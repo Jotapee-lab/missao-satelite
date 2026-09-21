@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Missão: Satélite</title>
+<style>
+:root{--bg:#07111f;--panel:#0d1c30;--text:#eef6ff;--muted:#9db0c8;--line:#29415d;--accent:#67d7ff}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(135deg,#030914,#0a1728);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);min-height:100vh}
+main{width:min(760px,calc(100% - 28px));margin:0 auto;padding:32px 0}
+.hero{padding:8px 0 18px}.hero h1{font-size:clamp(28px,6vw,42px);margin:0 0 6px}.hero p{margin:0;color:var(--muted)}
+.mission{background:rgba(13,28,48,.92);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 20px 60px #0005}
+.orbit{position:relative;height:300px;border-radius:16px;background:radial-gradient(circle at 50% 58%,#102c49 0 15%,transparent 16%),linear-gradient(#07111f,#0a1728);overflow:hidden;border:1px solid #1d3550}
+.earth{position:absolute;width:155px;height:155px;border-radius:50%;left:50%;top:63%;transform:translate(-50%,-50%);background:radial-gradient(circle at 35% 30%,#77c9e8,#286c9d 48%,#123c68 72%,#071b31);box-shadow:0 0 35px #1b668c88}
+.orbitline{position:absolute;width:500px;height:170px;border:2px dashed #5a89aa66;border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-8deg)}
+.stars{position:absolute;inset:0;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:47px 41px;opacity:.35}
+.sat{position:absolute;font-size:34px;left:50%;top:50%;transform:translate(-50%,-50%);transition:left .55s ease,top .55s ease,transform .55s ease;filter:drop-shadow(0 0 8px #67d7ff);cursor:pointer}
+.controls{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:13px}
+button{border:1px solid var(--line);background:#0d1c30;color:var(--text);border-radius:11px;padding:12px 8px;font-weight:650;cursor:pointer;min-height:48px}
+button:hover,button.active{border-color:var(--accent);background:#12324a}
+.info{margin-top:13px;padding:15px;background:#081728;border-radius:13px;border:1px solid var(--line);min-height:90px}
+.info strong{display:block;font-size:18px;margin-bottom:5px}.info span{color:var(--muted);font-size:14px;line-height:1.45}
+.score{display:flex;justify-content:space-between;gap:10px;margin-top:11px;color:var(--muted);font-size:13px}.score b{color:var(--text)}
+@media(max-width:520px){main{padding:20px 0}.controls{grid-template-columns:1fr 1fr}.orbit{height:240px}.orbitline{width:340px;height:125px}}
+</style>
+</head>
+<body>
+<main>
+<section class="hero">
+<h1>🛰️ Missão: Satélite</h1>
+<p>Interaja com o satélite e descubra como a tecnologia espacial está presente no nosso dia a dia.</p>
+</section>
+<section class="mission">
+<div class="orbit" aria-label="Satélite orbitando a Terra">
+<div class="stars"></div><div class="orbitline"></div><div class="earth"></div><div class="sat" id="sat">🛰️</div>
+</div>
+<div class="controls">
+<button data-type="gps">📍 GPS</button>
+<button data-type="weather">🌦️ Tempo</button>
+<button data-type="communication">📡 Comunicação</button>
+<button data-type="earth">🌍 Terra</button>
+<button data-type="tv">📺 TV</button>
+<button data-type="reset">↻ Reiniciar</button>
+</div>
+<div class="info" aria-live="polite">
+<strong id="title">Escolha uma missão</strong>
+<span id="desc">Clique em uma função. O satélite mudará de posição e mostrará como ele ajuda na Terra.</span>
+</div>
+<div class="score"><span>Missões descobertas: <b id="count">0</b>/5</span><span id="status">Pronto para decolar 🚀</span></div>
+</section>
+</main>
+<script>
+const sat=document.getElementById('sat'),title=document.getElementById('title'),desc=document.getElementById('desc'),count=document.getElementById('count'),status=document.getElementById('status');
+const data={
+gps:['GPS','Determina posições e ajuda em navegação, mapas e localização.','📍'],
+weather:['Previsão do tempo','Observa nuvens, tempestades e outros fenômenos para melhorar a previsão do tempo.','🌦️'],
+communication:['Comunicação','Ajuda a transmitir sinais de televisão, internet e outras comunicações a grandes distâncias.','📡'],
+earth:['Monitoramento da Terra','Observa oceanos, florestas, queimadas, agricultura e mudanças ambientais.','🌍'],
+tv:['Televisão','Recebe e retransmite sinais, permitindo que conteúdos cheguem a regiões muito distantes.','📺']
+};
+let seen=new Set();
+const positions=[[20,25],[78,22],[82,68],[18,68],[50,15]];
+document.querySelectorAll('button').forEach(btn=>{
+ btn.addEventListener('click',()=>{
+  const type=btn.dataset.type;
+  if(type==='reset'){
+   seen.clear();count.textContent='0';title.textContent='Escolha uma missão';
+   desc.textContent='Clique em uma função. O satélite mudará de posição e mostrará como ele ajuda na Terra.';
+   status.textContent='Pronto para decolar 🚀';sat.style.left='50%';sat.style.top='50%';
+   document.querySelectorAll('button').forEach(b=>b.classList.remove('active'));return;
+  }
+  const d=data[type],i=Object.keys(data).indexOf(type),p=positions[i];
+  seen.add(type);sat.style.left=p[0]+'%';sat.style.top=p[1]+'%';
+  sat.style.transform='translate(-50%,-50%) rotate('+(i*18-36)+'deg)';
+  title.textContent=d[2]+' '+d[0];desc.textContent=d[1];count.textContent=seen.size;
+  status.textContent=seen.size===5?'Missão completa! 🎉':'Boa! Descubra as outras funções.';
+  document.querySelectorAll('button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+ });
+});
+</script>
+</body>
+</html>
